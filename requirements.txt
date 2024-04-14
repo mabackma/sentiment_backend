@@ -1,0 +1,5 @@
+flask
+flask-cors
+typing
+pandas
+scikit-learn
