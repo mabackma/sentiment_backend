@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from typing import cast
 import pandas as pd
@@ -6,7 +6,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
-
+from dotenv import load_dotenv
+import os
+import jwt
+import datetime
 
 def change_to_numeric(rating):
     try:
@@ -70,14 +73,41 @@ pipeline = cast(Pipeline, train_model('Restaurant_reviews.csv'))
 app = Flask(__name__)
 CORS(app)
 
+load_dotenv()
+# Access environment variables
+env_username = os.getenv('USER_NAME')
+env_password = os.getenv('PASSWORD')
+secret_key = os.getenv('SECRET_KEY')
+print(env_username, env_password, secret_key)
 
-# Hello world
+
+# Return JWT token
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+
+    if not username or not password:
+        return jsonify({'message': 'Invalid username or password'}), 401
+
+    if username == env_username and password == env_password:
+        # Generate JWT token
+        token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+                           secret_key)
+        return jsonify({'token': token}), 200
+
+    return jsonify({'message': 'Invalid username or password'}), 401
+
+
+# Return sentiment prediction from post
 @app.route('/sentiment', methods=['POST'])
-def hello_world():
+def sentiment():
     data = request.get_json()
     prediction = predict_sentiment(pipeline, data['text'])
 
     return {'sentiment': prediction}
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080)

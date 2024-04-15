@@ -3,3 +3,5 @@ flask-cors
 typing
 pandas
 scikit-learn
+python-dotenv
+PyJWT
