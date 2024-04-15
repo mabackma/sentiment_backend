@@ -78,7 +78,6 @@ load_dotenv()
 env_username = os.getenv('USER_NAME')
 env_password = os.getenv('PASSWORD')
 secret_key = os.getenv('SECRET_KEY')
-print(env_username, env_password, secret_key)
 
 
 # Return JWT token
